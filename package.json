@@ -1,0 +1,16 @@
+{
+  "name": "steam-workshop-scraper",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.27.0",
+    "moment-timezone": "^0.5.31",
+    "scrape-it": "^5.2.4"
+  }
+}
