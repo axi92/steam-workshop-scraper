@@ -1,19 +1,29 @@
-const moment = require('moment');
-const momentTZ = require('moment-timezone');
+const SteamWorkshopScraper = require('./index.js');
+
+var sws = new SteamWorkshopScraper();
+
+sws.GetChangeLog(670764308).then(function (data) { // up to date mod
+  console.log('data', data.data[0]);
+}); //up to date 18. Aug. um 16:18 Uhr
+sws.GetInfo(670764308).then(function (data) {
+  console.log('data', data);
+}); //up to date 18. Aug. um 16:18 Uhr
 
 
 
-// 18 Aug @ 7:18am
-// 22 Apr, 2016 @ 12:43pm
 
-// US/Pacific
-// America/Los_Angeles
-// console.log(momentTZ.tz.guess());
-console.log(momentTZ.tz('18 Aug @ 7:18am', 'US/Pacific')); // , 'DD MMM H:mma'
-// moment.locale('de');
-// console.log(moment('18. Aug. um 16:18 Uhr', 'DD. MMM. hh:mm').format("dddd, MMMM Do YYYY, HH:mm"));
+sws.GetChangeLog(1384657523).then(function (data) { // Old mod 1384657523
+  console.log('data', data.data[0]);
+});
+sws.GetInfo(1384657523).then(function (data) {
+  console.log('data', data);
+});
 
 
-// console.log(moment('18. Mai 2018 um 23:39 Uhr', 'DD. MMM. YYYY hh:mm').format("dddd, MMMM Do YYYY, HH:mm"));
 
-// +9h
+sws.GetChangeLog(589205263).then(function (data) { // Never updated mod 589205263
+  console.log('data', data.data[0]);
+});
+sws.GetInfo(589205263).then(function (data) {
+  console.log('data', data);
+});
