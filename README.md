@@ -1,8 +1,11 @@
 <h1 align="center">Welcome to steam-workshop-scraper 👋</h1>
 <p>
-  <img alt="Version" src="https://img.shields.io/badge/version-0.0.2-blue.svg?cacheSeconds=2592000" />
-  <img src="https://img.shields.io/badge/npm-%3E%3D6.14.6-blue.svg" />
-  <img src="https://img.shields.io/badge/node-%3E%3D12.13.1-blue.svg" />
+  <a href="https://github.com/axi92/steam-workshop-scraper#readme" target="_blank">
+    <img alt="npm" src="https://img.shields.io/npm/v/steam-workshop-scraper">
+  </a>
+  <img alt="npm bundle size" src="https://img.shields.io/bundlephobia/minzip/steam-workshop-scraper">
+  <img src="https://img.shields.io/badge/npm version-%3E%3D6.14.6-blue.svg" />
+  <img src="https://img.shields.io/badge/node version-%3E%3D12.13.1-blue.svg" />
   <a href="https://github.com/axi92/steam-workshop-scraper#readme" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
@@ -11,6 +14,9 @@
   </a>
   <a href="https://github.com/axi92/steam-workshop-scraper/blob/master/LICENSE" target="_blank">
     <img alt="License: MIT" src="https://img.shields.io/github/license/axi92/steam-workshop-scraper" />
+  </a>
+  <a href="https://github.com/axi92/steam-workshop-scraper/issues" target="_blank">
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/axi92/steam-workshop-scraper">
   </a>
 </p>
 
