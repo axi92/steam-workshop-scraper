@@ -1,16 +1,27 @@
 {
   "name": "steam-workshop-scraper",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.0.2",
+  "description": "Gets data about Steam workshop mods/assets",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "axi92",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axi92/steam-workshop-scraper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/axi92/steam-workshop-scraper/issues"
+  },
   "dependencies": {
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
     "scrape-it": "^5.2.4"
+  },
+  "engines": {
+    "npm": ">=6.14.6",
+    "node": ">=12.13.1"
   }
 }

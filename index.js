@@ -5,9 +5,7 @@ const momentTZ = require('moment-timezone');
 
 
 class SteamWorkshopScraper {
-  constructor(lang) {
-    // this.lang = lang || 'en';
-    // moment.locale(this.lang);
+  constructor() {
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
     this.workShopUrlChangelog = 'https://steamcommunity.com/sharedfiles/filedetails/changelog/';
     this.parseSettingsInfo = {
@@ -45,16 +43,11 @@ class SteamWorkshopScraper {
   }
 
   GetInfo(id) {
-    return new Promise((resolve, reject) => {
-      resolve(this.Scrape(this.workShopUrlInfo + id.toString(), this.parseSettingsInfo));
-    });
+    return this.Scrape(this.workShopUrlInfo + id.toString(), this.parseSettingsInfo);
   }
 
   GetChangeLog(id) {
-    // var that = this;
-    return new Promise((resolve, reject) => {
-      resolve(this.Scrape(this.workShopUrlChangelog + id.toString(), this.parseSettingsChangeLog));
-    });
+    return this.Scrape(this.workShopUrlChangelog + id.toString(), this.parseSettingsChangeLog);
   }
 
   Scrape(url, parse) {
@@ -67,18 +60,12 @@ class SteamWorkshopScraper {
       // TODO: handle status code and error messages
       // console.log(`Status Code: ${response.statusCode}`)
       if (response.statusCode == 200) {
-        // console.log(response);
-        // console.log(data.updateDate);
         return data;
-        // return this.ParseSteamTime(date);
-      } else {
-        console.error(response.statusCode, ' response status code');
       }
     });
   }
 
   ParseSteamTime(string) {
-    // moment.locale('en'); // Set language to default steam site language
     if (string.match('[0-9]{4}')) {
       let parsed = moment(string, 'DD MMM, YYYY @ h:mma').format('YYYY-MM-DD HH:mm');
       let a = momentTZ.tz(parsed, 'America/Los_Angeles');
@@ -96,25 +83,8 @@ class SteamWorkshopScraper {
         console.error('not valid date2');
       }
     }
-    // moment.locale(this.lang); // set global language back
-    // time.locale(this.lang);
     return time.toISOString(true);
-    // return time.format("dd DD.MM.YYYY HH:mm");
   }
 }
-
-// var sws = new SteamWorkshopScraper();
-
-// sws.GetInfo(670764308).then(function (data) {
-//   console.log('data', data);
-// }); //up to date 18. Aug. um 16:18 Uhr
-// sws.GetInfo(1384657523); //old mod original date 18 May, 2018 @ 2:39pm
-// sws.GetInfo(589205263); //never updated
-
-
-// sws.GetChangeLog(670764308).then(function (data) {
-//   console.log('data', data.data[0]);
-// }); //up to date 18. Aug. um 16:18 Uhr
-
 
 module.exports = SteamWorkshopScraper;
