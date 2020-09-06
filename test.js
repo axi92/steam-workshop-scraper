@@ -2,6 +2,17 @@ const SteamWorkshopScraper = require('./index.js');
 
 var sws = new SteamWorkshopScraper();
 
+sws.Event.on('update', function(data){
+  console.log('data on update:', data);
+});
+
+sws.WatchForUpdates([670764308]);
+sws.WatchForUpdates([1384657523, 670764308, 670764308]);
+// console.log(sws.ids);
+
+
+return;
+
 sws.GetChangeLog(670764308).then(function (data) { // up to date mod
   console.log('data', data.data);
 }); //up to date 18. Aug. um 16:18 Uhr

@@ -1,11 +1,14 @@
 const scrapeIt = require("scrape-it");
 const moment = require('moment');
 const momentTZ = require('moment-timezone');
-
-
+const events = require('events');
+const async = require("async");
+const schedule = require('node-schedule');
 
 class SteamWorkshopScraper {
   constructor() {
+    this.workshopItems = {};
+    this.schedule = undefined;
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
     this.workShopUrlChangelog = 'https://steamcommunity.com/sharedfiles/filedetails/changelog/';
     this.parseSettingsInfo = {
@@ -40,6 +43,33 @@ class SteamWorkshopScraper {
         }
       }
     }
+    this.Event = new events.EventEmitter();
+    // var that = this;
+    // this.schedule = schedule.scheduleJob('*/10 * * * * *', async function () {
+    //   async.forEachOf(that.ids, function (value, key) {
+    //     // console.log(value);
+    //     that.GetInfo(value).then(function (data) {
+    //       // console.log('Info:', data);
+    //       // console.log(that.ids[`${value}`].timeUpdated.length);
+    //       console.log(`${value}`);
+    //       console.log(that.ids[1384657523]);
+    //       console.log(that.ids[`${value}`]);
+    //       // if (that.ids[`${value}`].timeUpdated.length === '0') {
+
+    //       //   let newArray = {};
+    //       //   newArray["title"] = value.title;
+    //       //   newArray["size"] = value.size;
+    //       //   newArray["timePublished"] = value.timePublished;
+    //       //   newArray["timeUpdated"] = value.timeUpdated;
+    //       //   newArray["image"] = value.image;
+    //       //   that.ids[`${value}`].push(newArray);
+    //       //   console.log(that.ids);
+    //       //   // modList.[]
+    //       // }
+    //       // console.log(moment(data.timeUpdated).format());
+    //     });
+    //   });
+    // });
   }
 
   GetInfo(id) {
@@ -49,6 +79,25 @@ class SteamWorkshopScraper {
   GetChangeLog(id) {
     return this.Scrape(this.workShopUrlChangelog + id.toString(), this.parseSettingsChangeLog);
   }
+
+  WatchForUpdates(ids) {
+    if (Array.isArray(ids) === false) {
+      throw new Error('Provided ids are not an array!');
+    }
+    this.ids = this.ids.concat(ids);
+    this.ids = [...new Set(this.ids)];
+    // console.log(this.ids);
+
+
+    // this.Event.emit('update', this.ids);
+  }
+
+  // RemoveFromUpdates(ids) {
+  //   if (Array.isArray(ids) === false) {
+  //     throw new Error('Provided ids are not an array!')
+  //   }
+  //   this.ids = this.ids.filter(x => !ids.includes(x));
+  // }
 
   Scrape(url, parse) {
     return scrapeIt({
