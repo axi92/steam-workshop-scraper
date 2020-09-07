@@ -7,7 +7,7 @@ const schedule = require('node-schedule');
 
 class SteamWorkshopScraper {
   constructor() {
-    this.workshopItems = {};
+    this.workshopMap = new Map();
     this.schedule = undefined;
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
     this.workShopUrlChangelog = 'https://steamcommunity.com/sharedfiles/filedetails/changelog/';
@@ -44,32 +44,27 @@ class SteamWorkshopScraper {
       }
     }
     this.Event = new events.EventEmitter();
-    // var that = this;
-    // this.schedule = schedule.scheduleJob('*/10 * * * * *', async function () {
-    //   async.forEachOf(that.ids, function (value, key) {
-    //     // console.log(value);
-    //     that.GetInfo(value).then(function (data) {
-    //       // console.log('Info:', data);
-    //       // console.log(that.ids[`${value}`].timeUpdated.length);
-    //       console.log(`${value}`);
-    //       console.log(that.ids[1384657523]);
-    //       console.log(that.ids[`${value}`]);
-    //       // if (that.ids[`${value}`].timeUpdated.length === '0') {
-
-    //       //   let newArray = {};
-    //       //   newArray["title"] = value.title;
-    //       //   newArray["size"] = value.size;
-    //       //   newArray["timePublished"] = value.timePublished;
-    //       //   newArray["timeUpdated"] = value.timeUpdated;
-    //       //   newArray["image"] = value.image;
-    //       //   that.ids[`${value}`].push(newArray);
-    //       //   console.log(that.ids);
-    //       //   // modList.[]
-    //       // }
-    //       // console.log(moment(data.timeUpdated).format());
-    //     });
-    //   });
-    // });
+    var that = this;
+    this.schedule = schedule.scheduleJob('*/10 * * * * *', async function () {
+      that.workshopMap.forEach(element => {
+        that.GetInfo(element.id).then(function (data) {
+          let preObject = that.workshopMap.get(element.id);
+          let tempObject = {};
+          tempObject.id = element.id;
+          tempObject.title = data.title;
+          tempObject.size = data.size;
+          tempObject.timePublished = data.timePublished;
+          tempObject.timeUpdated = data.timeUpdated;
+          tempObject.image = data.image;
+          that.workshopMap.set(element.id, tempObject);
+          if (preObject.timeUpdated != undefined && preObject.timeUpdated != data.timeUpdated) { // Workshop item was updated
+            // Emit update
+            that.Event.emit('update', tempObject);
+          }
+        });
+      });
+      // console.log(that.workshopMap);
+    });
   }
 
   GetInfo(id) {
@@ -80,24 +75,30 @@ class SteamWorkshopScraper {
     return this.Scrape(this.workShopUrlChangelog + id.toString(), this.parseSettingsChangeLog);
   }
 
-  WatchForUpdates(ids) {
+  AddToUpdates(ids) {
     if (Array.isArray(ids) === false) {
       throw new Error('Provided ids are not an array!');
     }
-    this.ids = this.ids.concat(ids);
-    this.ids = [...new Set(this.ids)];
-    // console.log(this.ids);
-
-
-    // this.Event.emit('update', this.ids);
+    for (var i = 0; i < ids.length; i++) {
+      let tempObject = {};
+      tempObject.id = ids[i];
+      tempObject.title = undefined;
+      tempObject.size = undefined;
+      tempObject.timePublished = undefined;
+      tempObject.timeUpdated = undefined;
+      tempObject.image = undefined;
+      this.workshopMap.set(ids[i], tempObject);
+    }
   }
 
-  // RemoveFromUpdates(ids) {
-  //   if (Array.isArray(ids) === false) {
-  //     throw new Error('Provided ids are not an array!')
-  //   }
-  //   this.ids = this.ids.filter(x => !ids.includes(x));
-  // }
+  RemoveFromUpdates(ids) {
+    if (Array.isArray(ids) === false) {
+      throw new Error('Provided ids are not an array!')
+    }
+    for (var i = 0; i < ids.length; i++) {
+      this.workshopMap.delete(ids[i]);
+    }
+  }
 
   Scrape(url, parse) {
     return scrapeIt({

@@ -1,6 +1,6 @@
 <h1 align="center">Welcome to steam-workshop-scraper 👋</h1>
 <p>
-  <a href="https://github.com/axi92/steam-workshop-scraper#readme" target="_blank">
+  <a href="https://www.npmjs.com/package/steam-workshop-scraper" target="_blank">
     <img alt="npm" src="https://img.shields.io/npm/v/steam-workshop-scraper">
   </a>
   <img alt="npm bundle size" src="https://img.shields.io/bundlephobia/minzip/steam-workshop-scraper">
@@ -45,6 +45,22 @@ sws.GetChangeLog(670764308).then(function (data) {
 
 sws.GetInfo(670764308).then(function (data) {
   console.log('Info:', data);
+});
+```
+
+### Or with update event
+
+```javascript
+const SteamWorkshopScraper = require('steam-workshop-scraper');
+var sws = new SteamWorkshopScraper();
+
+// Add your steam workshop ids what should be monitored
+sws.AddToUpdates([1384657523, 670764308, 589205263]);
+// Or remove some if you don't need them anymore
+sws.RemoveFromUpdates([670764308, 1384657523]);
+// Get the event fired if a workshop item gets updated.
+sws.Event.on('update', function(data){
+  console.log('data on update:', data);
 });
 ```
 
