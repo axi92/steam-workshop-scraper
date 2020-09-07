@@ -1,11 +1,14 @@
 const scrapeIt = require("scrape-it");
 const moment = require('moment');
 const momentTZ = require('moment-timezone');
-
-
+const events = require('events');
+const async = require("async");
+const schedule = require('node-schedule');
 
 class SteamWorkshopScraper {
   constructor() {
+    this.workshopMap = new Map();
+    this.schedule = undefined;
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
     this.workShopUrlChangelog = 'https://steamcommunity.com/sharedfiles/filedetails/changelog/';
     this.parseSettingsInfo = {
@@ -40,6 +43,28 @@ class SteamWorkshopScraper {
         }
       }
     }
+    this.Event = new events.EventEmitter();
+    var that = this;
+    this.schedule = schedule.scheduleJob('*/10 * * * * *', async function () {
+      that.workshopMap.forEach(element => {
+        that.GetInfo(element.id).then(function (data) {
+          let preObject = that.workshopMap.get(element.id);
+          let tempObject = {};
+          tempObject.id = element.id;
+          tempObject.title = data.title;
+          tempObject.size = data.size;
+          tempObject.timePublished = data.timePublished;
+          tempObject.timeUpdated = data.timeUpdated;
+          tempObject.image = data.image;
+          that.workshopMap.set(element.id, tempObject);
+          if (preObject.timeUpdated != undefined && preObject.timeUpdated != data.timeUpdated) { // Workshop item was updated
+            // Emit update
+            that.Event.emit('update', tempObject);
+          }
+        });
+      });
+      // console.log(that.workshopMap);
+    });
   }
 
   GetInfo(id) {
@@ -48,6 +73,31 @@ class SteamWorkshopScraper {
 
   GetChangeLog(id) {
     return this.Scrape(this.workShopUrlChangelog + id.toString(), this.parseSettingsChangeLog);
+  }
+
+  AddToUpdates(ids) {
+    if (Array.isArray(ids) === false) {
+      throw new Error('Provided ids are not an array!');
+    }
+    for (var i = 0; i < ids.length; i++) {
+      let tempObject = {};
+      tempObject.id = ids[i];
+      tempObject.title = undefined;
+      tempObject.size = undefined;
+      tempObject.timePublished = undefined;
+      tempObject.timeUpdated = undefined;
+      tempObject.image = undefined;
+      this.workshopMap.set(ids[i], tempObject);
+    }
+  }
+
+  RemoveFromUpdates(ids) {
+    if (Array.isArray(ids) === false) {
+      throw new Error('Provided ids are not an array!')
+    }
+    for (var i = 0; i < ids.length; i++) {
+      this.workshopMap.delete(ids[i]);
+    }
   }
 
   Scrape(url, parse) {
