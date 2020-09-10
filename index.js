@@ -45,7 +45,7 @@ class SteamWorkshopScraper {
     }
     this.Event = new events.EventEmitter();
     var that = this;
-    this.schedule = schedule.scheduleJob('*/10 * * * * *', async function () {
+    this.schedule = schedule.scheduleJob('0 * * * * *', async function () {
       that.workshopMap.forEach(element => {
         that.GetInfo(element.id).then(function (data) {
           let preObject = that.workshopMap.get(element.id);
