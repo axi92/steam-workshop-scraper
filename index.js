@@ -4,6 +4,7 @@ const momentTZ = require('moment-timezone');
 const events = require('events');
 const async = require("async");
 const schedule = require('node-schedule');
+const debug = require('debug')('steam-workshop-scraper');
 
 class SteamWorkshopScraper {
   constructor() {
@@ -111,11 +112,14 @@ class SteamWorkshopScraper {
       // console.log(`Status Code: ${response.statusCode}`)
       if (response.statusCode == 200) {
         return data;
+      } else {
+        console.error('Scrape failed with status code:', response.statusCode);
       }
     });
   }
 
   ParseSteamTime(string) {
+    debug('ParseStreamTime:', string);
     if (string.match('[0-9]{4}')) {
       let parsed = moment(string, 'DD MMM, YYYY @ h:mma').format('YYYY-MM-DD HH:mm');
       let a = momentTZ.tz(parsed, 'America/Los_Angeles');
@@ -126,11 +130,17 @@ class SteamWorkshopScraper {
       }
     } else {
       let parsed = moment(string, 'DD MMM @ h:mma').format('YYYY-MM-DD HH:mm');
-      let a = momentTZ.tz(parsed, 'America/Los_Angeles');
-      if (a.isValid()) {
-        var time = moment(a).local();
-      } else {
-        console.error('not valid date2');
+      var a = momentTZ.tz(parsed, 'America/Los_Angeles');
+      try {
+        if (a.isValid()) {
+          var time = moment(a).local();
+        } else {
+          console.error('not valid date2');
+        }
+      } catch (error){
+        debug('var a is:');
+        debug(a);
+        console.error('try catch error:', error);
       }
     }
     return time.toISOString(true);
