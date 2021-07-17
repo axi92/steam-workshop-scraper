@@ -1,6 +1,13 @@
 const SteamWorkshopScraper = require('./index.js');
 const sws = new SteamWorkshopScraper();
 
+sws.GetCollection(1942048407).then(function (data) { // up to date mod
+  // console.log(data);
+  sws.AddToUpdates(data);
+  console.log(sws.workshopMap);
+});
+
+
 sws.Event.on('update', function(data){
   console.log('data on update:', data);
 });

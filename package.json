@@ -1,6 +1,6 @@
 {
   "name": "steam-workshop-scraper",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Gets data about Steam workshop mods/assets",
   "main": "index.js",
   "scripts": {
@@ -17,11 +17,12 @@
   },
   "dependencies": {
     "async": "^3.2.0",
-    "debug": "^4.2.0",
+    "debug": "^4.3.2",
     "moment": "^2.29.1",
-    "moment-timezone": "^0.5.31",
+    "moment-timezone": "^0.5.33",
     "node-schedule": "^2.0.0",
-    "scrape-it": "^5.2.4"
+    "npm-check-updates": "^11.8.3",
+    "scrape-it": "^5.3.1"
   },
   "engines": {
     "npm": ">=6.14.6",

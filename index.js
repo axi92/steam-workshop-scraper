@@ -44,6 +44,18 @@ class SteamWorkshopScraper {
         }
       }
     }
+    this.parseCollectionInfo = {
+      data: {
+        listItem: ".collectionItem",
+        data: {
+          id: {
+            selector: 'div.collectionItemDetails > a:nth-child(1)',
+            attr: 'href',
+            convert: x => x.replace(/(.*)\=/g, '')
+          }
+        }
+      }
+    }
     this.Event = new events.EventEmitter();
     var that = this;
     this.schedule = schedule.scheduleJob('0 * * * * *', async function () {
@@ -74,6 +86,19 @@ class SteamWorkshopScraper {
 
   GetChangeLog(id) {
     return this.Scrape(this.workShopUrlChangelog + id.toString(), this.parseSettingsChangeLog);
+  }
+
+  GetCollection(id) {
+    let that = this;
+    return new Promise(async function(resolve, reject) {
+      let data = await that.Scrape(that.workShopUrlInfo + id.toString(), that.parseCollectionInfo);
+      data =  data.data;
+      let dataArray = [];
+      for (var i = 0; i < data.length; i++) {
+        dataArray.push(data[i].id);
+      }
+      resolve(dataArray);
+    });
   }
 
   AddToUpdates(ids) {
@@ -137,7 +162,7 @@ class SteamWorkshopScraper {
         } else {
           console.error('not valid date2');
         }
-      } catch (error){
+      } catch (error) {
         debug('var a is:');
         debug(a);
         console.error('try catch error:', error);
