@@ -24,8 +24,8 @@
 
 ## Prerequisites
 
-- npm >=6.14.6
-- node >=12.13.1
+- npm >=6.14.x ?
+- node >=14.x
 
 ## Install
 
@@ -62,12 +62,16 @@ sws.RemoveFromUpdates([670764308, 1384657523]);
 sws.Event.on('update', function(data){
   console.log('data on update:', data);
 });
+//To trigger the update manually
+sws.TriggerUpdate().then(function (){
+  console.log(sws.workshopMap);
+});
 ```
 
 ## Run tests
 
 ```sh
-npm run test
+npm test
 ```
 
 ## Author

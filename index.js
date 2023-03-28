@@ -2,7 +2,6 @@ const scrapeIt = require("scrape-it");
 const moment = require('moment');
 const momentTZ = require('moment-timezone');
 const events = require('events');
-const async = require("async");
 const schedule = require('node-schedule');
 const debug = require('debug')('steam-workshop-scraper');
 
@@ -57,30 +56,38 @@ class SteamWorkshopScraper {
       }
     }
     this.Event = new events.EventEmitter();
+    this.schedule = schedule.scheduleJob('28 * * * * *', function () {
+      this.TriggerUpdate();
+    }.bind(this));
+  }
+
+  async TriggerUpdate(){
     var that = this;
-    this.schedule = schedule.scheduleJob('0 * * * * *', async function () {
-      that.workshopMap.forEach(element => {
-        that.GetInfo(element.id).then(function (data) {
-          let preObject = that.workshopMap.get(element.id);
-          let tempObject = {};
-          tempObject.id = element.id;
-          tempObject.title = data.title;
-          tempObject.size = data.size;
-          tempObject.timePublished = data.timePublished;
-          tempObject.timeUpdated = data.timeUpdated;
-          tempObject.image = data.image;
-          that.workshopMap.set(element.id, tempObject);
-          if (preObject.timeUpdated != undefined && preObject.timeUpdated != data.timeUpdated) { // Workshop item was updated
-            // Emit update
-            that.Event.emit('update', tempObject);
-          }
-        });
-      });
-      // console.log(that.workshopMap);
+    const arr = Array.from(that.workshopMap, function (entry) {
+      return { key: entry[0], value: entry[1] };
     });
+    return Promise.all(arr.map(async (element) => {
+      element = element.value;
+      await that.GetInfo(element.id).then(function (data) {
+        let preObject = that.workshopMap.get(element.id);
+        let tempObject = {};
+        tempObject.id = element.id;
+        tempObject.title = data.title;
+        tempObject.size = data.size;
+        tempObject.timePublished = data.timePublished;
+        tempObject.timeUpdated = data.timeUpdated;
+        tempObject.image = data.image;
+        that.workshopMap.set(element.id, tempObject);
+        if (preObject.timeUpdated != undefined && preObject.timeUpdated != data.timeUpdated) { // Workshop item was updated
+          // Emit update
+          that.Event.emit('update', tempObject);
+        }
+      });
+    }));
   }
 
   GetInfo(id) {
+    // console.log('Getinfo', id)
     return this.Scrape(this.workShopUrlInfo + id.toString(), this.parseSettingsInfo);
   }
 
@@ -92,6 +99,7 @@ class SteamWorkshopScraper {
     let that = this;
     return new Promise(async function(resolve, reject) {
       let data = await that.Scrape(that.workShopUrlInfo + id.toString(), that.parseCollectionInfo);
+      // console.log(data)
       data =  data.data;
       let dataArray = [];
       for (var i = 0; i < data.length; i++) {
@@ -130,12 +138,12 @@ class SteamWorkshopScraper {
     return scrapeIt({
       url: url
     }, parse).then(({
-      data,
-      response
+      data
     }) => {
       // TODO: handle status code and error messages
-      // console.log(`Status Code: ${response.statusCode}`)
-      if (response.statusCode == 200) {
+      // console.log(`Status Code: ${data}`)
+      // console.log(data)
+      if (data != undefined) {
         return data;
       } else {
         console.error('Scrape failed with status code:', response.statusCode);
