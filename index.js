@@ -1,12 +1,11 @@
 const scrapeIt = require("scrape-it");
-const moment = require('moment');
-const momentTZ = require('moment-timezone');
 const events = require('events');
 const schedule = require('node-schedule');
 const debug = require('debug')('steam-workshop-scraper');
+const { DateTime, Settings } = require("luxon");
 
 class SteamWorkshopScraper {
-  constructor() {
+  constructor(timeZoneName = undefined) {
     this.workshopMap = new Map();
     this.schedule = undefined;
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
@@ -59,6 +58,12 @@ class SteamWorkshopScraper {
     this.schedule = schedule.scheduleJob('28 * * * * *', function () {
       this.TriggerUpdate();
     }.bind(this));
+    if(timeZoneName != undefined){
+      Settings.defaultZone = timeZoneName;
+      if(Settings.defaultZone.valid != true){
+        throw new Error('Timezone invalid for constructor SteamWorkshopScraper: ' + timeZoneName)
+      }
+    }
   }
 
   async TriggerUpdate(){
@@ -153,30 +158,25 @@ class SteamWorkshopScraper {
 
   ParseSteamTime(string) {
     debug('ParseStreamTime:', string);
-    if (string.match('[0-9]{4}')) {
-      let parsed = moment(string, 'DD MMM, YYYY @ h:mma').format('YYYY-MM-DD HH:mm');
-      let a = momentTZ.tz(parsed, 'America/Los_Angeles');
-      if (a.isValid()) {
-        var time = moment(a).local();
-      } else {
-        console.error('not valid date2');
-      }
+    var steamDefaultTimezone = 'America/Los_Angeles';
+    var time;
+    let time1 = DateTime.fromFormat(string, "d MMM, yyyy @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
+    let time2 = DateTime.fromFormat(string, "d MMM @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
+    let time3 = DateTime.fromFormat(string, "MMM d, yyyy @ h:ma", { locale: 'en', zone: steamDefaultTimezone }); // github workflow format
+    let time4 = DateTime.fromFormat(string, "MMM d @ h:ma", { locale: 'en', zone: steamDefaultTimezone }); // github workflow format for current year
+    if(time1.isValid){
+      time = time1;
+    } else if(time2.isValid){
+      time = time2;
+    } else if(time3.isValid){
+      time = time3;
+    } else if(time4.isValid){
+      time = time4;
     } else {
-      let parsed = moment(string, 'DD MMM @ h:mma').format('YYYY-MM-DD HH:mm');
-      var a = momentTZ.tz(parsed, 'America/Los_Angeles');
-      try {
-        if (a.isValid()) {
-          var time = moment(a).local();
-        } else {
-          console.error('not valid date2');
-        }
-      } catch (error) {
-        debug('var a is:');
-        debug(a);
-        console.error('try catch error:', error);
-      }
+      throw new Error('No time format was found in parser for: ' + string);
     }
-    return time.toISOString(true);
+    time = time.setZone(Settings.defaultZone);
+    return time.toString(true);
   }
 }
 
