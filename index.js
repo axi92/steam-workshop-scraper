@@ -1,12 +1,11 @@
 const scrapeIt = require("scrape-it");
-const moment = require('moment');
-const momentTZ = require('moment-timezone');
 const events = require('events');
 const schedule = require('node-schedule');
 const debug = require('debug')('steam-workshop-scraper');
+const { DateTime, Settings } = require("luxon");
 
 class SteamWorkshopScraper {
-  constructor() {
+  constructor(timeZoneName = undefined) {
     this.workshopMap = new Map();
     this.schedule = undefined;
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
@@ -59,6 +58,12 @@ class SteamWorkshopScraper {
     this.schedule = schedule.scheduleJob('28 * * * * *', function () {
       this.TriggerUpdate();
     }.bind(this));
+    if(timeZoneName != undefined){
+      Settings.defaultZone = timeZoneName;
+      if(Settings.defaultZone.valid != true){
+        throw new Error('Timezone invalid for constructor SteamWorkshopScraper: ' + timeZoneName)
+      }
+    }
   }
 
   async TriggerUpdate(){
@@ -153,20 +158,20 @@ class SteamWorkshopScraper {
 
   ParseSteamTime(string) {
     debug('ParseStreamTime:', string);
-    if (string.match('[0-9]{4}')) {
-      let parsed = moment(string, 'DD MMM, YYYY @ h:mma').format('YYYY-MM-DD HH:mm');
-      let a = momentTZ.tz(parsed, 'America/Los_Angeles');
-      if (a.isValid()) {
-        var time = moment(a).local();
+    var steamDefaultTimezone = 'America/Los_Angeles';
+    var time;
+    if (string.match('[0-9]{4}')) { // check if year is with 4 digits
+      let aaa = DateTime.fromFormat(string, "d MMM, yyyy @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
+      if (aaa.isValid) {
+        time = aaa.setZone(Settings.defaultZone);
       } else {
         console.error('not valid date2');
       }
     } else {
-      let parsed = moment(string, 'DD MMM @ h:mma').format('YYYY-MM-DD HH:mm');
-      var a = momentTZ.tz(parsed, 'America/Los_Angeles');
+      let aaa = DateTime.fromFormat(string, "d MMM @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
       try {
-        if (a.isValid()) {
-          var time = moment(a).local();
+        if (aaa.isValid) {
+          time = aaa.setZone(Settings.defaultZone);
         } else {
           console.error('not valid date2');
         }
@@ -176,7 +181,7 @@ class SteamWorkshopScraper {
         console.error('try catch error:', error);
       }
     }
-    return time.toISOString(true);
+    return time.toString(true);
   }
 }
 

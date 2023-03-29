@@ -1,5 +1,5 @@
 const SteamWorkshopScraper = require('../index.js');
-const sws = new SteamWorkshopScraper();
+const sws = new SteamWorkshopScraper('Universal');
 var assert = require('assert');
 
 
@@ -56,12 +56,24 @@ describe('SteamWorkshopScraper', function () {
     await sws.GetChangeLog(478528785).then(function (data) { // very old mod
       // console.log('data', data.data[0].text);
       assert.equal(data.data[0].text, 'Version 1.0');
-      assert.equal(data.data[0].timePosted, '2015-07-09T23:59:00.000+02:00');
+      assert.equal(data.data[0].timePosted, '2015-07-09T21:59:00.000+00:00');
     });
   });
 
   it('GetInfo never updated mod', async function () {
     await sws.GetInfo(518030553).then(function (data) {
+      // console.log(data);
+      assert.equal(data.title, 'TXM: Turret Expansion Mod');
+      assert.equal(data.size, '0.036 MB');
+      assert.equal(data.timePublished, '2015-09-14T01:52:00.000+00:00');
+      assert.equal(data.timeUpdated, '2015-09-14T01:52:00.000+00:00');
+      assert.equal(data.image, 'https://steamuserimages-a.akamaihd.net/ugc/421440386976795132/B34EDDA953337D1CD05DBE82BAAA397B0520AB50/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
+    });
+  });
+
+  it('Timezone', async function () {
+    const swsTZ = new SteamWorkshopScraper('Europe/Vienna');
+    await swsTZ.GetInfo(518030553).then(function (data) {
       // console.log(data);
       assert.equal(data.title, 'TXM: Turret Expansion Mod');
       assert.equal(data.size, '0.036 MB');
