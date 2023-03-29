@@ -165,7 +165,7 @@ class SteamWorkshopScraper {
       if (aaa.isValid) {
         time = aaa.setZone(Settings.defaultZone);
       } else {
-        console.error('not valid date2');
+        console.error('not valid date1 input:', string);
       }
     } else {
       let aaa = DateTime.fromFormat(string, "d MMM @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
@@ -173,7 +173,7 @@ class SteamWorkshopScraper {
         if (aaa.isValid) {
           time = aaa.setZone(Settings.defaultZone);
         } else {
-          console.error('not valid date2');
+          console.error('not valid date2 input:', string);
         }
       } catch (error) {
         debug('var a is:');
