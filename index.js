@@ -162,15 +162,18 @@ class SteamWorkshopScraper {
     var time;
     let time1 = DateTime.fromFormat(string, "d MMM, yyyy @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
     let time2 = DateTime.fromFormat(string, "d MMM @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
-    let time3 = DateTime.fromFormat(string, "MMM d, @ h:ma", { locale: 'en', zone: steamDefaultTimezone }); // github workflow gets this format
+    let time3 = DateTime.fromFormat(string, "MMM d, yyyy @ h:ma", { locale: 'en', zone: steamDefaultTimezone }); // github workflow format
+    let time4 = DateTime.fromFormat(string, "MMM d @ h:ma", { locale: 'en', zone: steamDefaultTimezone }); // github workflow format for current year
     if(time1.isValid){
       time = time1;
     } else if(time2.isValid){
       time = time2;
     } else if(time3.isValid){
-      time = time3
+      time = time3;
+    } else if(time4.isValid){
+      time = time4;
     } else {
-      throw new Error('No time format was found in parser for:' + string);
+      throw new Error('No time format was found in parser for: ' + string);
     }
     time = time.setZone(Settings.defaultZone);
     return time.toString(true);
