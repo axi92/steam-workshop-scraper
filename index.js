@@ -160,27 +160,19 @@ class SteamWorkshopScraper {
     debug('ParseStreamTime:', string);
     var steamDefaultTimezone = 'America/Los_Angeles';
     var time;
-    if (string.match('[0-9]{4}')) { // check if year is with 4 digits
-      let aaa = DateTime.fromFormat(string, "d MMM, yyyy @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
-      if (aaa.isValid) {
-        time = aaa.setZone(Settings.defaultZone);
-      } else {
-        console.error('not valid date1 input:', string);
-      }
+    let time1 = DateTime.fromFormat(string, "d MMM, yyyy @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
+    let time2 = DateTime.fromFormat(string, "d MMM @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
+    let time3 = DateTime.fromFormat(string, "MMM d, @ h:ma", { locale: 'en', zone: steamDefaultTimezone }); // github workflow gets this format
+    if(time1.isValid){
+      time = time1;
+    } else if(time2.isValid){
+      time = time2;
+    } else if(time3.isValid){
+      time = time3
     } else {
-      let aaa = DateTime.fromFormat(string, "d MMM @ h:ma", { locale: 'en', zone: steamDefaultTimezone });
-      try {
-        if (aaa.isValid) {
-          time = aaa.setZone(Settings.defaultZone);
-        } else {
-          console.error('not valid date2 input:', string);
-        }
-      } catch (error) {
-        debug('var a is:');
-        debug(a);
-        console.error('try catch error:', error);
-      }
+      throw new Error('No time format was found in parser for:' + string);
     }
+    time = time.setZone(Settings.defaultZone);
     return time.toString(true);
   }
 }
