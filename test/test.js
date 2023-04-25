@@ -1,14 +1,16 @@
 const SteamWorkshopScraper = require('../index.js');
 const sws = new SteamWorkshopScraper('Universal');
 var assert = require('assert');
-const { DateTime } = require("luxon");
+const {
+  DateTime
+} = require("luxon");
 
 describe('SteamWorkshopScraper', function () {
   it('should show 18 entries', async function () {
-    await sws.GetCollection(1608290482).then(function (data) { // old collection, hope nobody will ever change this collection
-      sws.AddToUpdates(data);
+    await sws.GetCollection(1608290482).then(function (collection) { // old collection, hope nobody will ever change this collection
+      sws.AddToUpdates(collection.data);
       // console.log(sws.workshopMap);
-      assert.equal(data.length, 18);
+      assert.equal(collection.data.length, 18);
     });
   });
 
@@ -48,7 +50,7 @@ describe('SteamWorkshopScraper', function () {
 
   it('TriggerUpdate and check title from one item', async function () {
     await sws.TriggerUpdate().then(function () {
-      assert.equal(sws.workshopMap.get('1999447172').title, 'Super Structures');
+      assert.equal(sws.workshopMap.get(1999447172).title, 'Super Structures');
     });
   });
 
@@ -87,4 +89,12 @@ describe('SteamWorkshopScraper', function () {
       assert.equal(data.image, 'https://steamuserimages-a.akamaihd.net/ugc/421440386976795132/B34EDDA953337D1CD05DBE82BAAA397B0520AB50/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
     });
   });
+
+  it('GetInfo on collection', async function () {
+    await sws.GetInfo(1608290482).then(function (data) {
+      assert.equal(data.title, 'ark mods');
+      assert.equal(data.data.length, 18);
+    });
+  });
+
 });

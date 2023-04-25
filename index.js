@@ -19,7 +19,7 @@ class SteamWorkshopScraper {
       },
       timeUpdated: {
         selector: '.detailsStatsContainerRight > div:nth-last-child(1)',
-        convert: x => this.ParseSteamTime(x.replace(/Update: /), '')
+        convert: x => this.ParseSteamTime(x.replace(/Update: /, ''))
       },
       image: {
         selector: '#previewImageMain',
@@ -43,6 +43,34 @@ class SteamWorkshopScraper {
       }
     }
     this.parseCollectionInfo = {
+      title: 'div.workshopItemTitle:nth-child(2)',
+      timePublished: {
+        selector: 'div.rightSectionHolder:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
+        convert: x => this.ParseSteamTime(x.replace(/Update: /, ''))
+      },
+      timeUpdated: {
+        selector: 'div.rightSectionHolder:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2)',
+        convert: x => this.ParseSteamTime(x.replace(/Update: /, ''))
+      },
+      image: {
+        selector: '#CollectionBackgroundImage',
+        attr: 'src'
+      },
+      data: {
+        listItem: ".collectionItem",
+        data: {
+          id: {
+            selector: 'div.collectionItemDetails > a:nth-child(1)',
+            attr: 'href',
+            convert: x => x.replace(/(.*)\=/g, '')
+          }
+        },
+        convert: x => {
+          return parseInt(x.id);
+        }
+      }
+    }
+    this.parseCollectionOrNot = {
       data: {
         listItem: ".collectionItem",
         data: {
@@ -91,9 +119,13 @@ class SteamWorkshopScraper {
     }));
   }
 
-  GetInfo(id) {
-    // console.log('Getinfo', id)
-    return this.Scrape(this.workShopUrlInfo + id.toString(), this.parseSettingsInfo);
+  async GetInfo(id) {
+    let checkCollection = await this.Scrape(this.workShopUrlInfo + id.toString(), this.parseCollectionOrNot)
+    if(checkCollection.data.length > 0){ // is collection
+      return this.Scrape(this.workShopUrlInfo + id.toString(), this.parseCollectionInfo);
+    } else { // is single mod
+      return this.Scrape(this.workShopUrlInfo + id.toString(), this.parseSettingsInfo);
+    }
   }
 
   GetChangeLog(id) {
@@ -104,13 +136,7 @@ class SteamWorkshopScraper {
     let that = this;
     return new Promise(async function(resolve, reject) {
       let data = await that.Scrape(that.workShopUrlInfo + id.toString(), that.parseCollectionInfo);
-      // console.log(data)
-      data =  data.data;
-      let dataArray = [];
-      for (var i = 0; i < data.length; i++) {
-        dataArray.push(data[i].id);
-      }
-      resolve(dataArray);
+      resolve(data);
     });
   }
 
