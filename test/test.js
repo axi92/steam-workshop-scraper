@@ -6,16 +6,16 @@ const {
 } = require("luxon");
 
 describe('SteamWorkshopScraper', function () {
-  it('should show 18 entries', async function () {
+  it('should show 17 entries', async function () {
     await sws.GetCollection(1608290482).then(function (collection) { // old collection, hope nobody will ever change this collection
       sws.AddToUpdates(collection.data);
       // console.log(sws.workshopMap);
-      assert.equal(collection.data.length, 18);
+      assert.equal(collection.data.length, 17);
     });
   });
 
   it('have map updated', function () {
-    assert.equal(sws.workshopMap.size, 18);
+    assert.equal(sws.workshopMap.size, 17);
   });
 
   it('register event', function () {
@@ -44,7 +44,7 @@ describe('SteamWorkshopScraper', function () {
 
   it('RemoveFromUpdates array', function (done) {
     sws.RemoveFromUpdates([670764308, 1384657523]);
-    assert.equal(sws.workshopMap.size, 19);
+    assert.equal(sws.workshopMap.size, 18);
     done();
   });
 
@@ -93,7 +93,7 @@ describe('SteamWorkshopScraper', function () {
   it('GetInfo on collection', async function () {
     await sws.GetInfo(1608290482).then(function (data) {
       assert.equal(data.title, 'ark mods');
-      assert.equal(data.data.length, 18);
+      assert.equal(data.data.length, 17);
     });
   });
 
