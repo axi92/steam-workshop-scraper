@@ -20,7 +20,6 @@
     "debug": "^4.3.2",
     "luxon": "^3.3.0",
     "node-schedule": "^2.1.1",
-    "npm-check-updates": "^16.8.0",
     "scrape-it": "^6.0.1"
   },
   "engines": {
@@ -28,6 +27,7 @@
     "node": ">=16.10.0"
   },
   "devDependencies": {
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "npm-check-updates": "^16.8.0"
   }
 }
