@@ -52,7 +52,7 @@ describe('SteamWorkshopScraper', function () {
     await sws.TriggerUpdate().then(function () {
       assert.equal(sws.workshopMap.get(1999447172).title, 'Super Structures');
     });
-  });
+  }).timeout(10000);
 
   it('GetChangeLog check text and timePosted', async function () {
     await sws.GetChangeLog(478528785).then(function (data) { // very old mod
