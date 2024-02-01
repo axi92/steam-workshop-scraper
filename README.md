@@ -4,8 +4,8 @@
     <img alt="npm" src="https://img.shields.io/npm/v/steam-workshop-scraper">
   </a>
   <img alt="npm bundle size" src="https://img.shields.io/bundlephobia/minzip/steam-workshop-scraper">
-  <img src="https://img.shields.io/badge/npm%20version-%3E%3D8.x.x-blue.svg" />
-  <img src="https://img.shields.io/badge/node version-%3E%3D16.x.x-blue.svg" />
+  <img src="https://img.shields.io/badge/npm%20version-%3E%3D10.x.x-blue.svg" />
+  <img src="https://img.shields.io/badge/node version-%3E%3D18.x.x-blue.svg" />
   <a href="https://github.com/axi92/steam-workshop-scraper#readme" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
@@ -24,8 +24,8 @@
 
 ## Prerequisites
 
-- npm >=8.x.x ?
-- node >=16.x
+- npm >=10.x.x
+- node >=18.x
 
 ## Install
 
