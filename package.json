@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "mocha": "^10.2.0",
-    "npm-check-updates": "^16.8.0"
+    "npm-check-updates": "^17.0.0"
   }
 }
