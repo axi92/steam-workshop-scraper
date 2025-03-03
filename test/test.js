@@ -67,7 +67,7 @@ describe('SteamWorkshopScraper', function () {
       assert.equal(data.size, '38.108 KB');
       assert.equal(data.timePublished, '2015-09-14T01:52:00.000+00:00');
       assert.equal(data.timeUpdated, '2015-09-14T01:52:00.000+00:00');
-      assert.equal(data.image, 'https://steamuserimages-a.akamaihd.net/ugc/421440386976795132/B34EDDA953337D1CD05DBE82BAAA397B0520AB50/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
+      assert.equal(data.image, 'https://images.steamusercontent.com/ugc/421440386976795132/B34EDDA953337D1CD05DBE82BAAA397B0520AB50/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
     });
   });
 
@@ -86,7 +86,7 @@ describe('SteamWorkshopScraper', function () {
       assert.equal(data.size, '38.108 KB');
       assert.equal(data.timePublished, '2015-09-14T03:52:00.000+02:00');
       assert.equal(data.timeUpdated, '2015-09-14T03:52:00.000+02:00');
-      assert.equal(data.image, 'https://steamuserimages-a.akamaihd.net/ugc/421440386976795132/B34EDDA953337D1CD05DBE82BAAA397B0520AB50/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
+      assert.equal(data.image, 'https://images.steamusercontent.com/ugc/421440386976795132/B34EDDA953337D1CD05DBE82BAAA397B0520AB50/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
     });
   });
 
