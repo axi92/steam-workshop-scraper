@@ -72,9 +72,9 @@ describe('SteamWorkshopScraper', function () {
   });
 
   it('GetInfo updated mod', async function () {
-    await sws.GetInfo(3390169945).then(function (data) {
-      assert.equal(data.title, 'What can I craft?');
-      assert.equal(data.timePublished, '2024-12-23T13:23:00.000+00:00');
+    await sws.GetInfo(3468585385).then(function (data) {
+      assert.equal(data.title, 'Blueprints Expanded');
+      assert.equal(data.timePublished, '2025-04-22T14:34:00.000+00:00');
       assert.equal(data.timeUpdated.includes(DateTime.now().year), true);
     });
   });
