@@ -90,7 +90,7 @@ Give a ⭐️ if this project helped you!
 
 ## 📝 License
 
-Copyright © 2020 [axi92](https://github.com/axi92).<br />
+Copyright © 2025 [axi92](https://github.com/axi92).<br />
 This project is [MIT](https://github.com/axi92/steam-workshop-scraper/blob/master/LICENSE) licensed.
 
 ***
