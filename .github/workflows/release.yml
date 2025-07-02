@@ -45,8 +45,6 @@ jobs:
           NPM_TOKEN: ${{ secrets.npm_token }}
       - name: Run release-it
         run: npx release-it ${{ github.event.inputs.input_version }} --ci
-        env:
-          BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
       - name: Create commit message
         run: |
           echo "chore: release $(jq -r '.version' package.json)" > commitMessageFile
