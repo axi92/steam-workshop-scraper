@@ -20,9 +20,28 @@ jobs:
       id-token: write
       attestations: write
     steps:
+      - uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        id: app-token
+        with:
+          # required
+          # Appid from this app: https://github.com/settings/apps/axi92release
+          app-id: 1500833
+          private-key: ${{ secrets.PRIVATE_KEY }}
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - run: |
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
+          # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
+          persist-credentials: false
       - name: Debug inputs
         run: |
           echo "Type of release:${{ github.event.inputs.input_version }} from user ${GITHUB_ACTOR}"
@@ -45,6 +64,8 @@ jobs:
           NPM_TOKEN: ${{ secrets.npm_token }}
       - name: Run release-it
         run: npx release-it ${{ github.event.inputs.input_version }} --ci
+        env:
+          BOT_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Create commit message
         run: |
           echo "chore: release $(jq -r '.version' package.json)" > commitMessageFile
@@ -52,6 +73,9 @@ jobs:
         uses: iarekylew00t/verified-bot-commit@2a9d9e983e611793b54516a18e48361bbac691d9 # v1.4.1
         with:
           message-file: commitMessageFile
+          token: ${{ steps.app-token.outputs.token }}
+          if-no-commit: notice
+          update-local: false # we don't need to pull the remote made changes via git to local
           files: |
             CHANGELOG.md
             package.json
