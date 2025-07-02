@@ -15,7 +15,7 @@
     "push": false
   },
   "npm": {
-    "publish": false,
+    "publish": true,
     "publishArgs": [
       "--provenance"
     ]
