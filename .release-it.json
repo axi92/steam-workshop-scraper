@@ -24,8 +24,7 @@
     "release": true,
     "assets": [
       "*.tgz"
-    ],
-    "tokenRef": "BOT_GITHUB_TOKEN"
+    ]
   },
   "plugins": {
     "@release-it/conventional-changelog": {
