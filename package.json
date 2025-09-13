@@ -1,6 +1,6 @@
 {
   "name": "steam-workshop-scraper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gets data about Steam workshop mods/assets",
   "main": "index.js",
   "scripts": {
