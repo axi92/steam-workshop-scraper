@@ -6,6 +6,8 @@ const { DateTime, Settings } = require("luxon");
 
 class SteamWorkshopScraper {
   constructor(timeZoneName = undefined) {
+    this.minDelay = 5000; // in ms
+    this.lastRequestTimestamp = 0;
     this.workshopMap = new Map();
     this.schedule = undefined;
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
@@ -165,21 +167,24 @@ class SteamWorkshopScraper {
     }
   }
 
-  Scrape(url, parse) {
-    return scrapeIt({
-      url: url
-    }, parse).then(({
-      data
-    }) => {
-      // TODO: handle status code and error messages
-      // console.log(`Status Code: ${data}`)
-      // console.log(data)
-      if (data != undefined) {
-        return data;
-      } else {
-        console.error('Scrape failed with status code:', response.statusCode);
-      }
-    });
+  async Scrape(url, parse) {
+    // I have this.lastRequestTimestamp that should hold the timestamp from the last request
+    // now wait untill the last request is more than 5 seconds in the past and then continue
+    // thats a rate limiting mesure
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTimestamp;
+    if (timeSinceLastRequest < this.minDelay) {
+      const waitTime = this.minDelay - timeSinceLastRequest;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+
+    const { data } = await scrapeIt({ url }, parse);
+    if (data !== undefined) {
+      this.lastRequestTimestamp = Date.now();
+      return data;
+    } else {
+      throw new Error('Scrape returned undefined data');
+    }
   }
 
   ParseSteamTime(string) {
@@ -203,6 +208,14 @@ class SteamWorkshopScraper {
     }
     time = time.setZone(Settings.defaultZone);
     return time.toString(true);
+  }
+
+  /**
+   *
+   * @param {number} delay To wait between requests to steam. Since 2025 steam changed its webserver to limit the requests. When hitting the limit steam returns HTTP 429.
+   */
+  SetRequestMinDelay(delay) {
+    this.minDelay = delay;
   }
 }
 
