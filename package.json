@@ -4,7 +4,7 @@
   "description": "Gets data about Steam workshop mods/assets",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit"
+    "test": "mocha --bail --exit"
   },
   "author": "axi92",
   "license": "MIT",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.1",
     "auto-changelog": "^2.5.0",
-    "mocha": "^11.0.1",
+    "mocha": "^11.7.5",
     "npm-check-updates": "^19.0.0",
     "release-it": "^19.0.3"
   }
