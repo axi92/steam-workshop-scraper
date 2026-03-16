@@ -42,9 +42,6 @@ jobs:
           fetch-depth: 0
           # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
           persist-credentials: false
-      - name: Debug inputs
-        run: |
-          echo "Type of release:${{ github.event.inputs.input_version }} from user ${GITHUB_ACTOR}"
       - name: Setup Node.js
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
@@ -57,11 +54,7 @@ jobs:
             node_modules
           key: node-modules
       - name: Install dependencies
-        run: npm i
-      - name: Authenticate with registry
-        run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-        env:
-          NPM_TOKEN: ${{ secrets.npm_token }}
+        run: npm ci
       - name: Run release-it
         run: npx release-it ${{ github.event.inputs.input_version }} --ci
         env:
