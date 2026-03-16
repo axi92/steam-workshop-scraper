@@ -54,11 +54,7 @@ jobs:
             node_modules
           key: node-modules
       - name: Install dependencies
-        run: npm i
-      - name: Authenticate with registry
-        run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-        env:
-          NPM_TOKEN: ${{ secrets.npm_token }}
+        run: npm ci
       - name: Run release-it
         run: npx release-it ${{ github.event.inputs.input_version }} --ci
         env:
