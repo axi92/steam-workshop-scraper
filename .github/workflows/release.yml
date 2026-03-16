@@ -42,9 +42,6 @@ jobs:
           fetch-depth: 0
           # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
           persist-credentials: false
-      - name: Debug inputs
-        run: |
-          echo "Type of release:${{ github.event.inputs.input_version }} from user ${GITHUB_ACTOR}"
       - name: Setup Node.js
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
