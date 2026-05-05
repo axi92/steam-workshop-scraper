@@ -30,7 +30,7 @@
     "@release-it/conventional-changelog": "^11.0.0",
     "auto-changelog": "^2.5.0",
     "mocha": "^11.7.5",
-    "npm-check-updates": "^20.0.0",
+    "npm-check-updates": "^22.1.0",
     "release-it": "^20.0.1"
   }
 }
