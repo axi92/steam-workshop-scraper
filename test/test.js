@@ -7,7 +7,9 @@ const {
 
 // Tests are taking forever because steam is rate limiting the requests so we have to wait between the requests to not get a 429 response.
 
+// Global timeout: tests can take a long time due to rate limiting (20s per request)
 describe('SteamWorkshopScraper', function () {
+  this.timeout(1800000); // 30 minutes
   it('should show 2 entries', async function () {
     await sws.GetCollection(3672359286).then(function (collection) {
       sws.AddToUpdates(collection.data);
@@ -54,14 +56,14 @@ describe('SteamWorkshopScraper', function () {
     await sws.TriggerUpdate().then(function () {
       assert.equal(sws.workshopMap.get(2228258035).title, 'HTTPLocation aka. Livemap (discontinued)');
     });
-  }).timeout(20000);
+  });
 
   it('GetChangeLog check text and timePosted', async function () {
     await sws.GetChangeLog(2228258035).then(function (data) { // very old mod
       assert.equal(data.data[0].text, '- Admins can access range menu');
       assert.equal(data.data[0].timePosted, '2021-06-26T00:02:00.000+00:00');
     });
-  }).timeout(20000);
+  });
 
   it('GetInfo mod', async function () {
     await sws.GetInfo(2228258035).then(function (data) {
@@ -70,9 +72,8 @@ describe('SteamWorkshopScraper', function () {
       assert.equal(data.timePublished, '2020-09-13T19:49:00.000+00:00');
       assert.equal(data.timeUpdated, '2021-06-26T00:02:00.000+00:00');
       assert.equal(data.image, 'https://images.steamusercontent.com/ugc/1638703839725745812/94DD04A9719BB0311E4218F8480F773833D3AE2F/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
-
     });
-  }).timeout(20000);
+  });
 
   it('Timezone', async function () {
     const swsTZ = new SteamWorkshopScraper('Europe/Vienna');
@@ -83,13 +84,13 @@ describe('SteamWorkshopScraper', function () {
       assert.equal(data.timeUpdated, '2015-09-14T03:52:00.000+02:00');
       assert.equal(data.image, 'https://images.steamusercontent.com/ugc/421440386976795132/B34EDDA953337D1CD05DBE82BAAA397B0520AB50/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
     });
-  }).timeout(20000);
+  });
 
   it('GetInfo on collection', async function () {
     await sws.GetInfo(3672359286).then(function (data) {
       assert.equal(data.title, 'test');
       assert.equal(data.data.length, 2);
     });
-  }).timeout(20000);
+  });
 
 });

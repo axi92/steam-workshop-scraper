@@ -20,17 +20,17 @@
     "debug": "^4.3.2",
     "luxon": "^3.3.0",
     "node-schedule": "^2.1.1",
-    "scrape-it": "^6.0.1"
+    "scrape-it": "^6.1.15"
   },
   "engines": {
-    "npm": ">=8.10.0",
-    "node": ">=16.10.0"
+    "npm": ">=12.0.2",
+    "node": ">=24.18.0"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^11.0.0",
-    "auto-changelog": "^2.5.0",
+    "@release-it/conventional-changelog": "^12.0.2",
+    "auto-changelog": "^2.7.0",
     "mocha": "^11.7.5",
     "npm-check-updates": "^22.1.0",
-    "release-it": "^20.0.1"
+    "release-it": "^21.1.1"
   }
 }

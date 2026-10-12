@@ -6,10 +6,13 @@ const { DateTime, Settings } = require("luxon");
 
 class SteamWorkshopScraper {
   constructor(timeZoneName = undefined) {
-    this.minDelay = 5000; // in ms
+    this.minDelay = 20000; // in ms (Steam rate limit: 1 request per 20 seconds)
     this.lastRequestTimestamp = 0;
     this.workshopMap = new Map();
     this.schedule = undefined;
+    this.isTriggerUpdateRunning = false; // Prevent recursive TriggerUpdate calls
+    this.scrapeQueue = []; // Queue for scrape requests
+    this.isScraping = false; // Lock to prevent concurrent scrape calls during rate limiting
     this.workShopUrlInfo = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
     this.workShopUrlChangelog = 'https://steamcommunity.com/sharedfiles/filedetails/changelog/';
     this.parseSettingsInfo = {
@@ -88,6 +91,10 @@ class SteamWorkshopScraper {
     this.schedule = schedule.scheduleJob('28 * * * * *', function () {
       this.TriggerUpdate();
     }.bind(this));
+    // Cancel the scheduled job - tests don't need it
+    if (this.schedule && typeof this.schedule.cancel === 'function') {
+      this.schedule.cancel();
+    }
     if(timeZoneName != undefined){
       Settings.defaultZone = timeZoneName;
       if(Settings.defaultZone.valid != true){
@@ -97,49 +104,55 @@ class SteamWorkshopScraper {
   }
 
   async TriggerUpdate(){
-    var that = this;
-    const arr = Array.from(that.workshopMap, function (entry) {
-      return { key: entry[0], value: entry[1] };
-    });
-    return Promise.all(arr.map(async (element) => {
-      element = element.value;
-      await that.GetInfo(element.id).then(function (data) {
-        let preObject = that.workshopMap.get(element.id);
+    // Prevent recursive calls
+    if (this.isTriggerUpdateRunning) {
+      debug('TriggerUpdate already running, skipping');
+      return;
+    }
+    this.isTriggerUpdateRunning = true;
+    
+    try {
+      var that = this;
+      const arr = Array.from(that.workshopMap);
+      
+      // Process each item sequentially to respect rate limit
+      for (const element of arr) {
+        const data = await that.GetInfo(element[0]);
+        let preObject = that.workshopMap.get(element[0]);
         let tempObject = {};
-        tempObject.id = element.id;
+        tempObject.id = element[0];
         tempObject.title = data.title;
         tempObject.size = data.size;
         tempObject.timePublished = data.timePublished;
         tempObject.timeUpdated = data.timeUpdated;
         tempObject.image = data.image;
-        that.workshopMap.set(element.id, tempObject);
+        that.workshopMap.set(element[0], tempObject);
         if (preObject.timeUpdated != undefined && preObject.timeUpdated != data.timeUpdated) { // Workshop item was updated
           // Emit update
           that.Event.emit('update', tempObject);
         }
-      });
-    }));
-  }
-
-  async GetInfo(id) {
-    let checkCollection = await this.Scrape(this.workShopUrlInfo + id.toString(), this.parseCollectionOrNot)
-    if(checkCollection.data.length > 0){ // is collection
-      return this.Scrape(this.workShopUrlInfo + id.toString(), this.parseCollectionInfo);
-    } else { // is single mod
-      return this.Scrape(this.workShopUrlInfo + id.toString(), this.parseSettingsInfo);
+      }
+    } finally {
+      this.isTriggerUpdateRunning = false;
     }
   }
 
-  GetChangeLog(id) {
+  async GetInfo(id) {
+    const checkCollection = await this.Scrape(this.workShopUrlInfo + id.toString(), this.parseCollectionOrNot);
+    if(checkCollection && checkCollection.data && checkCollection.data.data && checkCollection.data.data.length > 0){ // is collection
+      return await this.Scrape(this.workShopUrlInfo + id.toString(), this.parseCollectionInfo);
+    } else { // is single mod
+      return await this.Scrape(this.workShopUrlInfo + id.toString(), this.parseSettingsInfo);
+    }
+  }
+
+  async GetChangeLog(id) {
     return this.Scrape(this.workShopUrlChangelog + id.toString(), this.parseSettingsChangeLog);
   }
 
-  GetCollection(id) {
-    let that = this;
-    return new Promise(async function(resolve, reject) {
-      let data = await that.Scrape(that.workShopUrlInfo + id.toString(), that.parseCollectionInfo);
-      resolve(data);
-    });
+  async GetCollection(id) {
+    let data = await this.Scrape(this.workShopUrlInfo + id.toString(), this.parseCollectionInfo);
+    return data;
   }
 
   AddToUpdates(ids) {
@@ -168,22 +181,64 @@ class SteamWorkshopScraper {
   }
 
   async Scrape(url, parse) {
-    // I have this.lastRequestTimestamp that should hold the timestamp from the last request
-    // now wait untill the last request is more than 5 seconds in the past and then continue
-    // thats a rate limiting mesure
-    const now = Date.now();
-    const timeSinceLastRequest = now - this.lastRequestTimestamp;
-    if (timeSinceLastRequest < this.minDelay) {
-      const waitTime = this.minDelay - timeSinceLastRequest;
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+    // Create a promise that resolves when this request can proceed
+    return new Promise((resolve, reject) => {
+      // Add to queue
+      const queueEntry = { url, parse, resolve, reject };
+      this.scrapeQueue.push(queueEntry);
+      
+      // Try to process the queue
+      this.processScrapeQueue();
+    });
+  }
+  
+  async processScrapeQueue() {
+    // Only process if not currently scraping and queue is not empty
+    if (this.isScraping || this.scrapeQueue.length === 0) {
+      return;
     }
-
-    const { data } = await scrapeIt({ url }, parse);
-    if (data !== undefined) {
-      this.lastRequestTimestamp = Date.now();
-      return data;
-    } else {
-      throw new Error('Scrape returned undefined data');
+    
+    // Get the first item from queue
+    const entry = this.scrapeQueue.shift();
+    this.isScraping = true;
+    
+    try {
+      // Rate limiting: Steam API allows only 1 request every 20 seconds
+      // Wait until the last request is older than minDelay (default 20 seconds)
+      const now = Date.now();
+      const timeSinceLastRequest = now - this.lastRequestTimestamp;
+      if (timeSinceLastRequest < this.minDelay) {
+        debug('Waiting on the rate limit');
+        const waitTime = this.minDelay - timeSinceLastRequest;
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+      debug('Scrape', entry.url)
+      const { data } = await scrapeIt({ url: entry.url }, entry.parse);
+      
+      if (data !== undefined) {
+        this.lastRequestTimestamp = Date.now();
+        entry.resolve(data);
+      } else {
+        entry.reject(new Error('Scrape returned undefined data'));
+      }
+    } catch (error) {
+      // Handle HTTP 429 (Rate Limit) - retry after 25 seconds
+      // Check if error contains 429 or rate limit message
+      const errorMessage = error.message ? error.message.toString() : '';
+      if (errorMessage.includes('429') || errorMessage.includes('Rate Limit')) {
+        debug('Received rate limit error, waiting 25 seconds before retry');
+        await new Promise(resolve => setTimeout(resolve, 25000));
+        // Re-add this entry to the front of the queue and retry
+        this.scrapeQueue.unshift(entry);
+        this.isScraping = false;
+        this.processScrapeQueue();
+        return;
+      }
+      entry.reject(error);
+    } finally {
+      this.isScraping = false;
+      // Process next item in queue
+      this.processScrapeQueue();
     }
   }
 
@@ -212,7 +267,7 @@ class SteamWorkshopScraper {
 
   /**
    *
-   * @param {number} delay To wait between requests to steam. Since 2025 steam changed its webserver to limit the requests. When hitting the limit steam returns HTTP 429.
+   * @param {number} delay To wait between requests to steam. Default is 20000ms (20 seconds) to comply with Steam's rate limit. Since 2025 steam changed its webserver to limit the requests. When hitting the limit steam returns HTTP 429.
    */
   SetRequestMinDelay(delay) {
     this.minDelay = delay;
