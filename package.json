@@ -31,6 +31,6 @@
     "auto-changelog": "^2.5.0",
     "mocha": "^11.7.5",
     "npm-check-updates": "^22.1.0",
-    "release-it": "^20.0.1"
+    "release-it": "^21.1.2"
   }
 }
